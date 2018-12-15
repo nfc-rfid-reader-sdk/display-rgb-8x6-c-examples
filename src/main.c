@@ -18,7 +18,7 @@
 #define MIN_LIB_VER		"2.1.0"
 
 #define NUMBER_OF_PANELS			12
-#define NUMBER_OF_ROWS				4
+#define NUMBER_OF_ROWS				2
 
 /* zero is broadcast - only one LED Display can be connected to the bus */
 int display_id = 0;
@@ -35,12 +35,62 @@ void prn_status(char * chPreText)
 
 /*** ---------------------------------------------------------- ***/
 
+/*** ========================================================== ***/
+/*** === Global text buffer and helper macros ================= ***/
+/*** ---------------------------------------------------------- ***/
+
+#define TEXT_LENGTH_MAX		1024
+
+char text_buffer[TEXT_LENGTH_MAX + 1];
+int text_buffer_size;
+
+char *p2t; // pointer to the first empty position for adding text
+int free_bytes;
+int ts; // text size, temporary
+
+/*=== Useful macros ===*/
+
+/** Initialization */
+#define INIT() \
+	memset(text_buffer, 0, sizeof(text_buffer)); \
+	free_bytes = TEXT_LENGTH_MAX; \
+	text_buffer_size = 0; \
+	p2t = text_buffer;
+
+/** Insert provided C-string at the current position in the text buffer */
+#define INS_STR(cstr) \
+	strcpy(p2t, cstr); \
+	ts = strlen(p2t); \
+	p2t += ts; \
+	free_bytes -= ts; \
+	text_buffer_size = TEXT_LENGTH_MAX - free_bytes;
+
+/** Insert EndOfLine at the current position in the text buffer */
+#define INS_EOL() \
+	ts = free_bytes; \
+	status = DL_Insert_NewLine(p2t, &ts); \
+	p2t += ts; \
+	free_bytes -= ts; \
+	text_buffer_size = TEXT_LENGTH_MAX - free_bytes;
+
+/** Insert active text/time at the current position in the text buffer */
+#define INS_TIME(tstamp, tfmt)\
+	ts = free_bytes; \
+	status = DL_Insert_DateTimeFormated(p2t, &ts, (tstamp), (tfmt)); \
+	p2t += ts; \
+	free_bytes -= ts; \
+	text_buffer_size = TEXT_LENGTH_MAX - free_bytes;
+
+/*** ---------------------------------------------------------- ***/
+/*** ========================================================== ***/
+/*** ========================================================== ***/
+
 void set_display_configuration(void)
 {
 	int number_of_panels = NUMBER_OF_PANELS;
 	int number_of_rows = NUMBER_OF_ROWS;
 	int font = 2;
-	int brightness = 10;
+	int brightness = 5;
 	int scroll_start_ms = 1000;
 	int scroll_speed_ms = 300;
 	int screen_display_time = 5000; //
@@ -71,14 +121,16 @@ void set_default_message(void)
 	int green = 255;
 	int blue = 255;
 
-	char *default_msg = "DEFAULT MESSAGE";
-	int default_msg_len = strlen(default_msg);
-
 	printf("Test write default message in the %d\n", display_id); /* prints Test UART on ARM */
+
+	INIT();
+
+	INS_STR("DEFAULT MESSAGE");
+	INS_EOL();
 
 	status = DL_DisplaySetDefaultRgb(display_id, number_of_panels,
 			number_of_rows, font, brightness, scroll_start_ms, scroll_speed_ms,
-			screen_display_time, default_msg, default_msg_len, red, green,
+			screen_display_time, text_buffer, text_buffer_size, red, green,
 			blue);
 
 	prn_status("DL_DisplaySetDefaultRgb");
@@ -205,16 +257,24 @@ int main(void)
 
 	/*--- send text ---*/
 
-	char *text_content = "SAMPLE TEXT LINE";
-	int text_len = strlen(text_content);
+	INIT();
 
-	status = DL_DisplaySendText(display_id, text_content, text_len);
+	INS_STR("SAMPLE TEXT");
+	INS_EOL();
+	INS_STR("SECOND LINE");
+	INS_EOL();
+	INS_STR("NI\xE6 CITY");
+	INS_EOL();
+	INS_STR("LAST LINE");
+	INS_EOL();
+
+	status = DL_DisplaySendText(display_id, text_buffer, text_buffer_size);
 
 	prn_status("DL_DisplaySendText");
 
 	/* ---------------------------------------------------------- */
 
-	puts("Press enter to reset the display!");
+	puts("Press <ENTER> to reset the display, and show default message!");
 	fflush(stdout);
 	getchar();
 
