@@ -123,9 +123,19 @@ void set_default_message(void)
 
 	printf("Test write default message in the %d\n", display_id); /* prints Test UART on ARM */
 
+	/*--- prepare default message to be active text ---*/
+
 	INIT();
 
-	INS_STR("DEFAULT MESSAGE");
+	INS_STR("www.d-logic.net");
+	INS_EOL();
+	INS_TIME(0, 5); // time
+	INS_EOL();
+
+	INS_TIME(0, 2);	// date
+	INS_EOL();
+
+	INS_TIME(0, 5); // time
 	INS_EOL();
 
 	status = DL_DisplaySetDefaultRgb(display_id, number_of_panels,
