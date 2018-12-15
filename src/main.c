@@ -13,13 +13,6 @@
 #include <string.h>
 #include <time.h>
 
-#ifdef _WIN32
-#	include <windows.h>
-#else
-#	include <unistd.h>
-#	define Sleep(ms)		usleep((ms)*1000)
-#endif
-
 /*** ---------------------------------------------------------- ***/
 
 #define MIN_LIB_VER		"2.1.0"
@@ -220,17 +213,9 @@ int main(void)
 
 	/* ---------------------------------------------------------- */
 
-	puts("Wait for 10 seconds, then the display will reset !");
+	puts("Press enter to reset the display!");
 	fflush(stdout);
-
-	for (int i = 0; i < 10; ++i)
-	{
-		printf(".");
-		fflush(stdout);
-
-		Sleep(1000);
-	}
-	printf("\n");
+	getchar();
 
 	/* ---------------------------------------------------------- */
 
