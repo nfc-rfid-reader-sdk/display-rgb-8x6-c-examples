@@ -93,7 +93,7 @@ void set_display_configuration(void)
 	int brightness = 5;
 	int scroll_start_ms = 1000;
 	int scroll_speed_ms = 300;
-	int screen_display_time = 5000; //
+	int screen_display_time = 10000; //
 	int red = 182;
 	int green = 255;
 	int blue = 0;
@@ -116,7 +116,7 @@ void set_default_message(void)
 	int brightness = 5;
 	int scroll_start_ms = 1000;
 	int scroll_speed_ms = 500;
-	int screen_display_time = 5000; //
+	int screen_display_time = 10000; //
 	int red = 0;
 	int green = 255;
 	int blue = 255;
@@ -144,6 +144,40 @@ void set_default_message(void)
 			blue);
 
 	prn_status("DL_DisplaySetDefaultRgb");
+}
+
+/** prepare text with active content */
+void active_text_example(void)
+{
+	/*--- Fill with (active) text ---*/
+
+	INIT();
+
+	/*--- Display clock ---*/
+	INS_TIME(0, 5);
+	INS_EOL();
+
+	/*--- Display count down ---*/
+	const int count_down_seconds = 30;
+	time_t count_down = time(0) + count_down_seconds;
+
+	INS_STR("(30) ")
+	INS_TIME(count_down, 7);
+	INS_EOL();
+
+	/*--- more active texts ---*/
+
+	INS_TIME(0, 15);
+	INS_EOL();
+
+	INS_TIME(0, 23);
+	INS_EOL();
+
+	/*--- show active text on the display ---*/
+
+	status = DL_DisplaySendText(display_id, text_buffer, text_buffer_size);
+
+	prn_status("DL_DisplaySendText");
 }
 
 /*** ---------------------------------------------------------- ***/
@@ -281,6 +315,14 @@ int main(void)
 	status = DL_DisplaySendText(display_id, text_buffer, text_buffer_size);
 
 	prn_status("DL_DisplaySendText");
+
+	/* ---------------------------------------------------------- */
+
+	printf("Look at display and then press <ENTER> to display active content!");
+	fflush(stdout);
+	getchar();
+
+	active_text_example();
 
 	/* ---------------------------------------------------------- */
 
