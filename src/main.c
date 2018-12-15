@@ -154,10 +154,11 @@ int main(void)
 
 	if (DL_OK == status)
 	{
-		printf("Current LED Display time is= (timestamp= %u) %s\n", timestamp,
-				ctime((const time_t *) &timestamp));
-
+		time_t tmptime = timestamp;
 		// ctime() convert timestamp to (local time) string
+		char *timestr = ctime(&tmptime);
+		printf("Current LED Display time is= (timestamp= %u) %s\n", timestamp,
+				timestr);
 	}
 
 	/*--- Set the display time and check ---*/
