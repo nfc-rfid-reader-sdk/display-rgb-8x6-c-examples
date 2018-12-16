@@ -1,3 +1,0 @@
-[submodule "lib"]
-	path = lib
-	url = https://git.d-logic.net/led-display-rgb-sdk/display-rgb-16x14-lib.git
